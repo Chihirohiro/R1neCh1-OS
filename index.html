@@ -171,7 +171,33 @@ body::after,.topbar::after,.spark::before,.face::after,.today-head::after,.anniv
 .rine-completed summary{cursor:pointer;font-size:12px}
 .rine-completed .rine-todo-row{background:transparent;opacity:.55}
 .rine-completed .rine-todo-text{text-decoration:line-through;color:#91969a}
-</style></head>
+</style><style id="rine-clock-color-adjustment">
+/* Keep the clock large while making room for the wide pixel glyphs. */
+.prep-page .prep-clock{
+ font-size:clamp(88px,23vw,116px)!important;
+ line-height:1.18!important;
+ letter-spacing:.055em!important;
+ white-space:nowrap!important;
+ width:125%!important;
+ max-width:none!important;
+ margin:16px 0 14px -12.5%!important;
+ transform:scaleX(.76)!important;
+ transform-origin:center center!important;
+ overflow:visible!important;
+ color:#798b9c!important;
+}
+.prep-page .prep-meta{margin-top:5px!important}
+/* Muted, slightly blue gray, rather than saturated blue or near-black. */
+.prep-page,.prep-page .prep-task,.prep-page .prep-now,.prep-page .prep-next,
+.prep-page .prep-target,.prep-page .prep-meta,.prep-page .prep-label,
+.prep-page select,.prep-page .between select,.prep-page .prep-actions button,
+.prep-page .prep-watch summary,.prep-page .prep-watch .step-stats,
+.prep-page .prep-watch .step-stats *{color:#788798!important}
+.today-date,#homePage .home-date,.today-title,.today-head h2{
+ color:#778da6!important;
+}
+</style>
+</head>
 <body>
 <div id="app">
 <header class="topbar"><div class="topbar-row"><button class="top-back" id="topBack" onclick="goBack()" aria-label="戻る">‹</button><div class="topbar-copy"><h1 id="pageTitle">ホーム</h1><div class="sub" id="pageSub">今日をまとめる。</div></div></div></header>
