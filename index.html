@@ -101,6 +101,10 @@ button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer}te
 .app-status{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:rgba(233,247,255,.9);color:#4f9fc9;font-size:10px;font-weight:850;border:1px solid rgba(183,222,242,.72)}
 .app-status::before{content:"✦"}.install-note{margin-top:8px;font-size:11px;color:var(--muted);line-height:1.55}.version-chip{font-size:10px;color:#88a0b2;font-weight:750}
 </style>
+<style>
+@font-face{font-family:'Pomeranian';src:url('./Pomeranian-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+html,body,button,input,textarea,select{font-family:'Pomeranian',sans-serif !important}
+</style>
 </head>
 <body>
 <div id="app">
@@ -250,7 +254,31 @@ function syncPrepEdits(){const t=activePrep();t.steps.forEach((x,i)=>{const a=$(
 function movePrepStep(i,dir){syncPrepEdits();const t=activePrep(),j=i+dir;if(j<0||j>=t.steps.length)return;[t.steps[i],t.steps[j]]=[t.steps[j],t.steps[i]];openPrepSettings()}
 function deletePrepStep(i){syncPrepEdits();const t=activePrep(),removed=t.steps[i];t.steps.splice(i,1);if(t.goalStepId===removed?.id)t.goalStepId='';openPrepSettings()}
 function addPrepStep(){syncPrepEdits();const text=$('#newStepText').value.trim();if(!text)return;activePrep().steps.push({id:uid(),text,target:''});openPrepSettings()}
-function savePrepSettings(){syncPrepEdits();const t=activePrep();t.goalTime=$('#prepGoalTime').value;t.goalStepId=$('#prepGoalStep').value;t.color=$('#prepColor').value;data.prepState.index=Math.min(data.prepState.index,Math.max(0,t.steps.length-1));save();closeSheet()}
+function savePrepSettings(){syncPrepEdits();const t=activePrep();t.goalTime=$('#prepGoalTime').value;t.goalStepId=$('#prepGoalStep').value;t.color=$('#prepColor').value;data.prepState.index=Math.min(data.prepState.index,Math.max(0,t.steps.length-1));save();closeSheet()
+  // 保存後は編集画面を閉じて準備画面へ戻す
+  try {
+    let toast=document.getElementById("prepSavedToast");
+    if(!toast){
+      toast=document.createElement("div");
+      toast.id="prepSavedToast";
+      toast.textContent="保存しました";
+      toast.style.cssText="position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);left:50%;transform:translateX(-50%);z-index:99999;background:rgba(255,255,255,.94);color:#5684ad;padding:9px 16px;border-radius:999px;box-shadow:0 5px 20px rgba(80,130,175,.18);font-weight:700;font-size:13px;pointer-events:none;opacity:0;transition:opacity .18s ease;";
+      document.body.appendChild(toast);
+    }
+    toast.style.opacity="1";
+    setTimeout(()=>toast.style.opacity="0",1100);
+  } catch(e){}
+  setTimeout(()=>{
+    try{
+      if(typeof closeModal==="function") closeModal();
+      else {
+        const modal=document.querySelector(".modal.show,.modal.open,.sheet.show,.sheet.open");
+        if(modal){ modal.classList.remove("show","open"); modal.style.display="none"; }
+      }
+      if(typeof renderPrep==="function") renderPrep();
+    }catch(e){ console.error(e); }
+  },180);
+}
 function openNewPrepTemplate(){const src=activePrep();openSheet(`<h3>準備モードを追加</h3><div class="label">モード名</div><input id="newPrepName" class="input" placeholder="普通のお出かけ"><div class="label" style="margin-top:10px">作り方</div><label class="important-check"><input type="radio" name="prepCreate" value="copy" checked><span><b>今の工程をコピー</b><div class="tiny muted">${esc(src.name)} を元に作る</div></span></label><label class="important-check"><input type="radio" name="prepCreate" value="new"><span><b>新規作成</b><div class="tiny muted">空の工程から作る</div></span></label><div class="sheet-actions"><button class="btn ghost" onclick="closeSheet()">やめる</button><button class="btn primary" onclick="createPrepTemplate()">作成</button></div>`)}
 function createPrepTemplate(){const name=$('#newPrepName').value.trim();if(!name)return;const mode=document.querySelector('input[name="prepCreate"]:checked')?.value||'copy',src=activePrep(),id=uid();const steps=mode==='copy'?src.steps.map(x=>({id:uid(),text:x.text,target:''})):[];data.prepTemplates.push({id,name,leave:'',goalTime:mode==='copy'?(src.goalTime||''):'',goalStepId:'',color:mode==='copy'?(src.color||'pink'):'blue',steps});data.prepState.templateId=id;data.prepState.index=0;save();closeSheet();openPrepSettings()}
 let prepDragFrom=null,prepPointer=null;
@@ -285,5 +313,15 @@ async function installPWA(){if(!deferredInstallPrompt)return;deferredInstallProm
 window.addEventListener('load',()=>{requestPersistentStorage();recoverDeviceCopy();idbPut(clone(data))});
 function renderAll(){renderMore();renderHome();renderCalendar();renderLists();renderPrep();renderDiet();renderDiary();renderWork();renderCycles()}
 Object.assign(window,{go,goBack,toggleHomeSection,togglePeriodStart,toggleTodo,toggleEventPack,guessEventList,toggleWorkEditChoice,deleteEvent,saveHomeDiary,openWish,previewWishImage,saveWish,deleteWish,openJournalEntry,saveJournalEntry,openEditMemo,saveEditMemo,setDiaryTag,calMove,showDay,setListFilter,openList,openListEditor,toggleListItem,editListItem,deleteListItem,addListItem,resetList,duplicateList,deleteList,openNewList,createList,toggleUniformAtHome,toggleWorkBagCheck,toggleWorkBagItem,addWorkBagItem,editWorkBagItem,deleteWorkBagItem,moveWorkBagItem,toggleListEdit,moveListItem,prepNext,prepBack,prepReset,changePrepTemplate,togglePrepStopwatch,openPrepStats,resetPrepStat,openPrepSettings,openNewPrepTemplate,createPrepTemplate,movePrepStep,prepDragStart,prepDragOver,prepDrop,prepDragEnd,prepPointerStart,deletePrepStep,addPrepStep,savePrepSettings,openWeight,saveWeight,openMeal,saveMeal,openGoal,saveGoal,renderDiary,openBulkShift,saveBulkShift,cycleDone,openCycle,saveCycle,openQuickAdd,saveQuickTodo,saveQuickEvent,closeSheet,exportData,importData,installPWA});renderAll();
+</script>
+<script>
+(function(){
+ const m=[["日記","renderDiary"],["交換周期","renderCycles"],["持ち物","renderLists"],["リスト","renderLists"],["バイト","renderWork"]];
+ document.addEventListener("click",function(e){
+  const x=e.target.closest("button,a,.row,.menu-item,[onclick]"); if(!x)return;
+  const s=(x.textContent||"").trim();
+  for(const [a,f] of m) if(s.includes(a)&&typeof window[f]==="function") setTimeout(()=>{try{window[f]()}catch(z){console.error(f,z)}},10);
+ },true);
+})();
 </script>
 </body></html>
